@@ -4,6 +4,7 @@ import { Celebration } from "../feel/Celebration";
 import { HAPTICS } from "../feel/haptics";
 import { ScorePop } from "../feel/ScorePop";
 import { useHaptics } from "../feel/useHaptics";
+import { prefersReducedMotion } from "../motion/reducedMotion";
 import { nextHint } from "./hints";
 import { assign, checkGuesses, evaluate, fullSolution, isSolved, type Guesses } from "./logic";
 import { Keyboard } from "./Keyboard";
@@ -15,6 +16,8 @@ import { formatDuration, solveScore } from "./scoring";
 const TAP_PULSE = 8;
 /** Points shown when a guess is right. Shown only, not scored. */
 const RIGHT_POINTS = 1;
+/** How long a tile's flip lasts, in ms. Matches the `tile-flip` animation in index.css. */
+const FLIP_MS = 200;
 
 interface Pop {
   id: number;
@@ -65,6 +68,8 @@ export function CryptogramGame({ puzzle }: CryptogramGameProps) {
   const [checks, setChecks] = useState<Record<string, boolean> | null>(null);
   const [pops, setPops] = useState<Pop[]>([]);
   const [celebration, setCelebration] = useState<string | null>(null);
+  // The cipher letter whose tiles are flipping now. `key` makes each flip a new one.
+  const [flip, setFlip] = useState<{ letter: string; key: number } | null>(null);
   // Pop-ups are placed where the tile was tapped. The last tap position is kept here.
   const [tapPoint, setTapPoint] = useState({ x: 0, y: 0 });
 
@@ -90,10 +95,22 @@ export function CryptogramGame({ puzzle }: CryptogramGameProps) {
 
   const onCelebrationDone = useCallback(() => setCelebration(null), []);
 
+  // The flip ends after its animation. A new flip restarts the timer through its key.
+  useEffect(() => {
+    if (flip === null) return;
+    const id = window.setTimeout(() => setFlip(null), FLIP_MS);
+    return () => window.clearTimeout(id);
+  }, [flip]);
+
   const commit = (next: Guesses) => {
     setHistory((h) => [...h, guesses]);
     setGuesses(next);
     setChecks(null);
+  };
+
+  /** Flip a cipher letter's tiles when it is first filled correctly. Reduced motion skips the flip. */
+  const startFlip = (letter: string) => {
+    if (!prefersReducedMotion()) setFlip({ letter, key: Math.random() });
   };
 
   /** Called when a move makes the board solved. A revealed board is not timed, so it keeps no solve time. */
@@ -115,6 +132,7 @@ export function CryptogramGame({ puzzle }: CryptogramGameProps) {
     const next = assign(guesses, selected, plain);
     const wasSolved = solved;
     const right = solution[selected] === plain;
+    const wasEmpty = guesses[selected] === undefined;
     commit(next);
 
     // Mistakes are counted only while the board is still being played.
@@ -125,6 +143,7 @@ export function CryptogramGame({ puzzle }: CryptogramGameProps) {
     if (right) {
       setPops((list) => [...list, { id: Date.now() + Math.random(), x: tapPoint.x, y: tapPoint.y }]);
       haptics.pulse(HAPTICS.clear);
+      if (wasEmpty) startFlip(selected);
     }
     if (!wasSolved && isSolved(encoded, next, solution)) onSolvedNow();
   };
@@ -148,6 +167,7 @@ export function CryptogramGame({ puzzle }: CryptogramGameProps) {
     if (!hint) return;
     const next = assign(guesses, hint.cipherLetter, hint.plain);
     const wasSolved = solved;
+    const wasEmpty = guesses[hint.cipherLetter] === undefined;
     commit(next);
     setStats((s) => ({
       ...s,
@@ -156,6 +176,7 @@ export function CryptogramGame({ puzzle }: CryptogramGameProps) {
       hinted: [...s.hinted, hint.cipherLetter],
     }));
     haptics.pulse(HAPTICS.clear);
+    if (wasEmpty) startFlip(hint.cipherLetter);
     if (!wasSolved && isSolved(encoded, next, solution)) onSolvedNow();
   };
 
@@ -189,6 +210,7 @@ export function CryptogramGame({ puzzle }: CryptogramGameProps) {
   const tileClass = (cipherLetter: string) => {
     const classes = ["tile"];
     if (cipherLetter === selected) classes.push("tile-selected");
+    if (flip?.letter === cipherLetter) classes.push("tile-flip");
     if (hintedSet.has(cipherLetter)) classes.push("tile-hint");
     if (counts.conflicts.has(cipherLetter)) classes.push("tile-conflict");
     if (checks && cipherLetter in checks) classes.push(checks[cipherLetter] ? "tile-right" : "tile-wrong");
@@ -196,11 +218,14 @@ export function CryptogramGame({ puzzle }: CryptogramGameProps) {
   };
 
   const statusText = () => {
-    if (solved && stats.revealed) return `${quote.author}, ${quote.source}. Revealed, not scored.`;
-    if (solved) return `${quote.author}, ${quote.source}`;
     if (selected) return `Cipher letter ${selected} selected. Pick a letter on the keyboard.`;
     return "Tap a cipher letter to select it.";
   };
+
+  const timeText =
+    stats.startedAt !== null && stats.solvedAt !== null && !stats.revealed
+      ? formatDuration(stats.solvedAt - stats.startedAt)
+      : "not timed";
 
   return (
     <section className="cryptogram" aria-label="Cryptogram">
@@ -240,19 +265,27 @@ export function CryptogramGame({ puzzle }: CryptogramGameProps) {
         {celebration && <Celebration id={celebration} label="Solved!" onDone={onCelebrationDone} />}
       </div>
 
-      <p className="cryptogram-status" role="status">
-        {statusText()}
-        {checkCounts && !solved && ` ${checkCounts.right} right, ${checkCounts.wrong} wrong.`}
-      </p>
-      {score !== null && stats.solvedAt !== null && stats.startedAt !== null && (
-        <p className="cryptogram-score">
-          Solved in {formatDuration(stats.solvedAt - stats.startedAt)} · {score} points
-        </p>
-      )}
-      {!solved && (
-        <p className="cryptogram-score">
-          Mistakes {stats.mistakes} · Hints {stats.hints} · Letters left {counts.unguessed}
-        </p>
+      {solved ? (
+        <div className="solve-card">
+          <p className="solve-quote">&ldquo;{quote.text}&rdquo;</p>
+          <p className="solve-author">
+            {quote.author}, <em>{quote.source}</em>
+          </p>
+          <p className="solve-stats">
+            {stats.revealed ? "Revealed, not scored" : `Time ${timeText} · Score ${score ?? 0}`}
+            {` · Mistakes ${stats.mistakes} · Hints ${stats.hints}`}
+          </p>
+        </div>
+      ) : (
+        <>
+          <p className="cryptogram-status" role="status">
+            {statusText()}
+            {checkCounts && ` ${checkCounts.right} right, ${checkCounts.wrong} wrong.`}
+          </p>
+          <p className="cryptogram-score">
+            Mistakes {stats.mistakes} · Hints {stats.hints} · Letters left {counts.unguessed}
+          </p>
+        </>
       )}
 
       <div className="cryptogram-actions">

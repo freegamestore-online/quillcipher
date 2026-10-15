@@ -1,3 +1,4 @@
+// Local copy – switch to @freegamestore/games/feel once SDK ≥ 0.17 ships it.
 // TODO: switch to @freegamestore/games/feel once published
 // Feel kit, copied from tilerun-gh (web/src/feel + web/src/motion).
 export { ParticleLayer, type ParticleLayerHandle } from "./ParticleLayer";

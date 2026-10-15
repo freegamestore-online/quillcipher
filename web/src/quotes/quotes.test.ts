@@ -60,3 +60,26 @@ describe("free-play quote", () => {
     expect(getFreePlayQuote(-1).id).toBe(QUOTES[n - 1]!.id);
   });
 });
+
+describe("packs", () => {
+  const isPublicDomain = (q: (typeof QUOTES)[number]) =>
+    (q.authorDeathYear !== undefined && q.authorDeathYear < 1955) ||
+    (q.publicationYear !== undefined && q.publicationYear < 1929);
+
+  it("daily quotes for 2026-10-01 to 2026-10-30 are catalogue entries that are public domain", () => {
+    for (let d = 1; d <= 30; d++) {
+      const date = `2026-10-${String(d).padStart(2, "0")}`;
+      const quote = getDailyQuote(date);
+      expect(QUOTES, date).toContain(quote);
+      expect(isPublicDomain(quote), date).toBe(true);
+    }
+  });
+
+  it("free-play quotes for seeds 0 to 49 are catalogue entries that are public domain", () => {
+    for (let seed = 0; seed < 50; seed++) {
+      const quote = getFreePlayQuote(seed);
+      expect(QUOTES, `seed ${seed}`).toContain(quote);
+      expect(isPublicDomain(quote), `seed ${seed}`).toBe(true);
+    }
+  });
+});
