@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildCipher, encode, invert } from "../cipher/cipher";
-import { assign, checkGuesses, conflicts, fullSolution, isSolved, lettersIn } from "./logic";
+import { assign, checkGuesses, conflicts, evaluate, fullSolution, isSolved, lettersIn } from "./logic";
 
 const cipher = buildCipher(5);
 const solution = invert(cipher);
@@ -39,5 +39,31 @@ describe("guess logic", () => {
     const missing = { ...full };
     delete missing[lettersIn(encoded)[0]!];
     expect(isSolved(encoded, missing, solution)).toBe(false);
+  });
+});
+
+describe("evaluate", () => {
+  it("reports a fully correct mapping as solved", () => {
+    const result = evaluate(encoded, fullSolution(encoded, solution), solution);
+    expect(result.solved).toBe(true);
+    expect(result.wrong).toBe(0);
+    expect(result.unguessed).toBe(0);
+    expect(result.conflicts.size).toBe(0);
+  });
+
+  it("counts correct, wrong and unguessed letters", () => {
+    const [c1, c2] = lettersIn(encoded);
+    const wrong = solution[c2!] === "Z" ? "Y" : "Z";
+    const result = evaluate(encoded, { [c1!]: solution[c1!]!, [c2!]: wrong }, solution);
+    expect(result.solved).toBe(false);
+    expect(result.correct).toBe(1);
+    expect(result.wrong).toBe(1);
+    expect(result.unguessed).toBe(lettersIn(encoded).length - 2);
+  });
+
+  it("reports the cipher letters that share a plain letter", () => {
+    const [c1, c2] = lettersIn(encoded);
+    const result = evaluate(encoded, { [c1!]: "Q", [c2!]: "Q" }, solution);
+    expect([...result.conflicts].sort()).toEqual([c1, c2].sort());
   });
 });

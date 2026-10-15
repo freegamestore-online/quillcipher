@@ -64,4 +64,26 @@ describe("CryptogramGame", () => {
     fireEvent.click(screen.getByRole("button", { name: "Undo" }));
     expect(tile(first)[0]!.getAttribute("aria-label")).toContain("not guessed");
   });
+
+  it("hint fills one letter correctly and locks it against edits", () => {
+    render(<CryptogramGame puzzle={puzzle} />);
+    fireEvent.click(screen.getByRole("button", { name: "Hint" }));
+    const hinted = lettersIn(puzzle.encoded).find((c) => loadProgress(puzzle.storageKey)?.hinted?.includes(c))!;
+    expect(loadProgress(puzzle.storageKey)?.guesses[hinted]).toBe(puzzle.solution[hinted]);
+    expect(loadProgress(puzzle.storageKey)?.hints).toBe(1);
+
+    fireEvent.click(tile(hinted)[0]!);
+    const wrong = puzzle.solution[hinted] === "Z" ? "Y" : "Z";
+    press(wrong);
+    expect(loadProgress(puzzle.storageKey)?.guesses[hinted]).toBe(puzzle.solution[hinted]);
+  });
+
+  it("counts a wrong letter as a mistake and a right one as not", () => {
+    render(<CryptogramGame puzzle={puzzle} />);
+    fireEvent.click(tile(first)[0]!);
+    press(puzzle.solution[first] === "Z" ? "Y" : "Z");
+    expect(loadProgress(puzzle.storageKey)?.mistakes).toBe(1);
+    press(puzzle.solution[first]!);
+    expect(loadProgress(puzzle.storageKey)?.mistakes).toBe(1);
+  });
 });

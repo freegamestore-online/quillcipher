@@ -250,3 +250,16 @@ body {
     transition: none;
   }
 }
+
+/* A hinted tile is locked: it shows the answer as settled, not as a guess. */
+.tile-hint {
+  background: var(--panel);
+  border-style: dashed;
+}
+
+.cryptogram-score {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: center;
+}

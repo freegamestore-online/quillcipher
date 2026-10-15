@@ -56,3 +56,29 @@ export function fullSolution(encoded: string, solution: Substitution): Guesses {
   for (const c of lettersIn(encoded)) guesses[c] = solution[c]!;
   return guesses;
 }
+
+/** How a player's mapping stands against the solution. */
+export interface Evaluation {
+  solved: boolean;
+  /** Guessed cipher letters that match the solution. */
+  correct: number;
+  /** Guessed cipher letters that do not match the solution. */
+  wrong: number;
+  /** Cipher letters in the text with no guess yet. */
+  unguessed: number;
+  /** Cipher letters that share a plain letter with another. */
+  conflicts: Set<string>;
+}
+
+/** Check a player's mapping against the solution. This is the engine's one entry point for scoring a board. */
+export function evaluate(encoded: string, guesses: Guesses, solution: Substitution): Evaluation {
+  const checks = Object.entries(checkGuesses(guesses, solution));
+  const correct = checks.filter(([, right]) => right).length;
+  return {
+    solved: isSolved(encoded, guesses, solution),
+    correct,
+    wrong: checks.length - correct,
+    unguessed: lettersIn(encoded).filter((c) => guesses[c] === undefined).length,
+    conflicts: conflicts(guesses),
+  };
+}
