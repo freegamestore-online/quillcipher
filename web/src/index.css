@@ -80,3 +80,173 @@ body {
   height: 100%;
   overflow: hidden;
 }
+
+/* Play area: fills the space under the topbar and scrolls within itself on short phones. */
+.play-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  height: 100%;
+  padding: 0.75rem 1rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.mode-switch,
+.free-actions,
+.cryptogram-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* Board: the quote as tiles. Position is relative so pop-ups can be placed on it. */
+.cryptogram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 40rem;
+}
+
+.cryptogram-board {
+  position: relative;
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-sizing: border-box;
+}
+
+.cryptogram-text {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 0.6rem;
+  margin: 0;
+  font-family: "Fraunces", serif;
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.word {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.15rem;
+}
+
+.punct {
+  align-self: flex-end;
+  padding-bottom: 0.4rem;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  min-height: 2.75rem;
+  padding: 0.15rem 0.2rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0.5rem;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+
+.tile-cipher {
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+.tile-guess {
+  font-weight: 700;
+  min-height: 1.1em;
+}
+
+.tile-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.tile-conflict {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.tile-right {
+  background: var(--accent-soft);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.tile-wrong {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.cryptogram-status {
+  margin: 0;
+  min-height: 1.25em;
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* On-screen keyboard: rows of keys, each at least 44px tall for touch. */
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 34rem;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.key {
+  flex: 1 1 0;
+  max-width: 2.6rem;
+  min-height: 44px;
+  border: 1px solid var(--line-strong);
+  border-radius: 0.5rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.key:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.key-used {
+  background: var(--panel);
+  color: var(--muted);
+}
+
+.key-wide {
+  flex: 0 1 8rem;
+  max-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .key {
+    transition: none;
+  }
+}

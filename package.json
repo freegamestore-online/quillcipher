@@ -9,6 +9,7 @@
     "build": "pnpm --filter @quillcipher/web build",
     "preview": "pnpm --filter @quillcipher/web preview",
     "typecheck": "pnpm --filter @quillcipher/web exec tsc -b",
-    "test": "pnpm --filter @quillcipher/web test"
+    "test": "pnpm --filter @quillcipher/web test",
+    "lint": "pnpm --filter @quillcipher/web lint"
   }
 }
