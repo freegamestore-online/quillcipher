@@ -288,27 +288,27 @@ export function CryptogramGame({ puzzle }: CryptogramGameProps) {
         </>
       )}
 
-      <div className="cryptogram-actions">
-        <GameButton size="sm" variant="ghost" onClick={onUndo} disabled={history.length === 0}>
-          Undo
-        </GameButton>
-        <GameButton size="sm" variant="ghost" onClick={onCheck} disabled={solved}>
-          Check
-        </GameButton>
-        <GameButton size="sm" variant="secondary" onClick={onHint} disabled={!hint}>
-          Hint
-        </GameButton>
-        <GameButton size="sm" variant="ghost" onClick={onReveal} disabled={solved}>
-          Reveal
-        </GameButton>
-      </div>
+      {/* Solved, the actions and keyboard have nothing to do. Hiding them keeps the card on screen with no scroll. */}
+      {!solved && (
+        <>
+          <div className="cryptogram-actions">
+            <GameButton size="sm" variant="ghost" onClick={onUndo} disabled={history.length === 0}>
+              Undo
+            </GameButton>
+            <GameButton size="sm" variant="ghost" onClick={onCheck}>
+              Check
+            </GameButton>
+            <GameButton size="sm" variant="secondary" onClick={onHint} disabled={!hint}>
+              Hint
+            </GameButton>
+            <GameButton size="sm" variant="ghost" onClick={onReveal}>
+              Reveal
+            </GameButton>
+          </div>
 
-      <Keyboard
-        used={usedPlain}
-        onKey={onKey}
-        onClear={onClear}
-        disabled={!selected || solved || selectedHinted}
-      />
+          <Keyboard used={usedPlain} onKey={onKey} onClear={onClear} disabled={!selected || selectedHinted} />
+        </>
+      )}
     </section>
   );
 }

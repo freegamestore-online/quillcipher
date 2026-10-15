@@ -314,3 +314,15 @@ body {
   color: var(--muted);
   font-size: 0.9rem;
 }
+
+/* Footer link to the store. Kept small so the play area still fits without scrolling. */
+.store-link {
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-decoration: none;
+  text-align: center;
+}
+
+.store-link:hover {
+  text-decoration: underline;
+}

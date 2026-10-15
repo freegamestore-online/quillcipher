@@ -39,6 +39,9 @@ export function GameShell({ mode, onModeChange, stats, children }: GameShellProp
           </GameButton>
         </div>
         {children}
+        <a className="store-link" href="https://freegamestore.online" target="_blank" rel="noopener">
+          Built for freegamestore.online
+        </a>
       </div>
     </PlatformShell>
   );

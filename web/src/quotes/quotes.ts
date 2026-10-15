@@ -120,8 +120,7 @@ const ENTRIES: readonly QuoteEntry[] = [
   { id: "nietzsche-why-how", text: "He who has a why to live for can bear almost any how.", author: "Friedrich Nietzsche", source: "Twilight of the Idols", authorDeathYear: 1900, publicationYear: 1889 },
   { id: "nietzsche-monsters", text: "Whoever fights monsters should see to it that in the process he does not become a monster.", author: "Friedrich Nietzsche", source: "Beyond Good and Evil", authorDeathYear: 1900, publicationYear: 1886 },
 
-  // Marcus Aurelius (d. 180) and Seneca (d. 65)
-  { id: "aurelius-obstacle-way", text: "The impediment to action advances action. What stands in the way becomes the way.", author: "Marcus Aurelius", source: "Meditations, Book 5", authorDeathYear: 180 },
+  // Seneca (d. 65)
   { id: "seneca-imagination", text: "We suffer more often in imagination than in reality.", author: "Seneca", source: "Letters to Lucilius, Letter 13", authorDeathYear: 65 },
 
   // Plato (d. 348 BCE)
